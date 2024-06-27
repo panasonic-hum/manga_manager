@@ -6,6 +6,7 @@ from sqlmodel import SQLModel, Field, create_engine, TIMESTAMP, text, Column, Fe
 
 class ReadingLists(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="User.id")
     status: int = Field(nullable=False)
     score: Optional[int]
     chapters_read: Optional[int] = None
@@ -67,6 +68,7 @@ class UpdateType(str, Enum):
     read = "read"
     unread = "unread"
 
+
 class ReadUpdate(MangaInfoId):
     chapters_read: int | None = None
     volumes_read: int | None = None
@@ -80,6 +82,69 @@ class ReadUpdate(MangaInfoId):
         ))
 
 
+class ScoreUpdate(MangaInfoId):
+    score: int | None = None
+    last_edited: datetime = Field(
+        default=None,
+        sa_column=Column(
+            TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=text("CURRENT_TIMESTAMP"),
+            server_onupdate=FetchedValue(),
+        ))
+
+
+class StatusUpdate(MangaInfoId):
+    status: int | None = None
+    last_edited: datetime = Field(
+        default=None,
+        sa_column=Column(
+            TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=text("CURRENT_TIMESTAMP"),
+            server_onupdate=FetchedValue(),
+        ))
+
+
+class User(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    username: str = Field(unique=True)
+    full_name: str | None = None
+    active: bool | None = None
+    hashed_password: str
+
+
+class UserInDB(User):
+    hashed_password: str
+
+
+class Token(SQLModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(SQLModel):
+    username: str | None = None
+
+
+class ReadingLog(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: Optional[int] = Field(default=None, foreign_key="user.id")
+    readinglists_id: Optional[int] = Field(default=None, foreign_key="readinglists.id")
+    mark_type: MarkType
+    update_type: UpdateType
+    mark_value: int
+    updated_date: datetime = Field(
+        default=None,
+        sa_column=Column(
+            TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=text("CURRENT_TIMESTAMP"),
+            server_onupdate=FetchedValue(),
+        ))
+
+
+
 sqlite_file_name = "manga_manager.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
@@ -89,3 +154,5 @@ engine = create_engine(sqlite_url, echo=True, connect_args=connect_args)
 
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
+
+

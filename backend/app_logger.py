@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from pathlib import Path
 
 
 class LogConfig(BaseModel):
@@ -7,6 +8,9 @@ class LogConfig(BaseModel):
     LOGGER_NAME: str = "manga_manager"
     LOG_FORMAT: str = "%(levelprefix)s | %(asctime)s | %(message)s"
     LOG_LEVEL: str = "INFO"
+    parent_dir: str = Path(__file__).parent
+    LOG_FILE: str = f"{parent_dir}/app.log"
+    print(LOG_FILE)
 
     # Logging config
     version: int = 1
@@ -23,7 +27,12 @@ class LogConfig(BaseModel):
             "formatter": "default",
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stdout",
-        }
+        },
+        # "file": {
+        #     "formatter": "default",
+        #     "class": "logging.FileHandler",
+        #     "args": {LOG_FILE}
+        # }
     }
     loggers: dict = {
         LOGGER_NAME: {"handlers": ["default"], "level": LOG_LEVEL},

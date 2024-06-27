@@ -18,7 +18,7 @@ def main():
             for i in data:
                 ts = int(i["created_at"])
                 created_at = datetime.fromtimestamp(ts, tz=timezone.utc)
-                manga_val = ReadingLists(status=i["status"], score=i["score"], chapters_read=i["num_read_chapters"],
+                manga_val = ReadingLists(status=i["status"], user_id=1, score=i["score"], chapters_read=i["num_read_chapters"],
                                          volumes_read=i["num_read_volumes"], added_date=created_at,
                                          manga_title=i["manga_title"],
                                          manga_title_eng=i["manga_english"], chapters_total=i["manga_num_chapters"],
