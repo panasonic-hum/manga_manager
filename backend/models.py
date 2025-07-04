@@ -145,7 +145,7 @@ class ReadingLog(SQLModel, table=True):
 
 
 
-sqlite_file_name = "manga_manager.db"
+sqlite_file_name = "manga_manager_backup.db"
 sqlite_url = f"sqlite:///{sqlite_file_name}"
 
 connect_args = {"check_same_thread": False}

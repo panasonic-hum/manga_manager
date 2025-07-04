@@ -2,7 +2,7 @@ import sqlite3
 import json
 from datetime import datetime, timezone
 
-conn = sqlite3.connect("manga_manager.db")
+conn = sqlite3.connect("manga_manager_backup.db")
 cur = conn.cursor()
 
 with open("MALlists/all_lists.json", 'r') as file:

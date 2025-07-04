@@ -13,6 +13,7 @@ from passlib.context import CryptContext
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+from fastapi.middleware.cors import CORSMiddleware
 
 dictConfig(LogConfig().dict())
 logger = logging.getLogger("manga_manager")
@@ -26,6 +27,17 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost",
+    "https://localhost",
+    "http://localhost:4321"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.on_event("startup")
@@ -106,6 +118,16 @@ def create_user(username: str, password: str, full_name: str):
         session.commit()
 
 
+@app.post("/users/updatepassword/")
+def update_password(username: str, password: str):
+    with Session(models.engine) as session:
+        user = get_user(username)
+        hashedpass = get_password_hash(password)
+        user.hashed_password = hashedpass
+        session.add(user)
+        session.commit()
+
+
 @app.post("/token")
 async def login_for_access_token(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
@@ -135,6 +157,14 @@ async def read_users_me(
 def all_mangalists(current_user: Annotated[models.User, Depends(get_current_active_user)]):
     with Session(models.engine) as session:
         statement = select(models.ReadingLists).where(models.ReadingLists.user_id == current_user.id)
+        all_lists = session.exec(statement)
+        return all_lists.all()
+
+
+@app.get("/mangamanager/lists/allshelby")
+def all_mangalists():
+    with Session(models.engine) as session:
+        statement = select(models.ReadingLists).where(models.ReadingLists.user_id == 1)
         all_lists = session.exec(statement)
         return all_lists.all()
 
